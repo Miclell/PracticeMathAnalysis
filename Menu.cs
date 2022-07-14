@@ -13,9 +13,14 @@ namespace PracticeMathAnalysis
 
             string functionBody = String.Empty;
             decimal a = 0, b = 0;
+            decimal intervals = 0;
+            bool trigger = false;
 
-            functionBody = "8x^4+6x^3+x^2*cos(x)+2^(1/2)";
-            a = 6; b = 21;
+            //functionBody = "sqrt(xsqrt(xsqrt(x)))";
+            //a = 4; b = 8;
+
+            //functionBody = "x^8*cos(x)+x^4";
+            //a = 3; b = 5.89m;
 
             Console.WriteLine("Инструкция:\n1. Вводить все интегралы в виде его тела и пределов интегрирования\n2. Числа с плавающей точкой вводить только с точкой\n3. Для навигации по меню использовать цифры, соответствующие номерам строк\n4. По окончании ввода нажимать enter");
             Console.ReadKey();
@@ -32,9 +37,9 @@ namespace PracticeMathAnalysis
 
             void ShowInput()
             {
-                Console.WriteLine($"Тело интеграла: {(functionBody == String.Empty ? "ожидается" : functionBody)}\tНижний предел: {(a == b ? "ожидается" : a)}\tВерхний предел: {(a == b ? "ожидается" : b)}");
+                Console.WriteLine($"Тело интеграла: {(functionBody == String.Empty ? "ожидается" : functionBody)}\tНижний предел: {(a == b ? "ожидается" : a)}\tВерхний предел: {(a == b ? "ожидается" : b)}\tКоличесвто инетвралов: {(trigger ? intervals : "ожидается")}");
 
-                Console.WriteLine("1. Ввести тело интеграла\n2. Ввести нижний предел инетерирования\n3. Ввести верхний предел интегрирования\n4. Закончить ввод\n5. Показать инструкцию");
+                Console.WriteLine("1. Ввести тело интеграла\n2. Ввести нижний предел инетерирования\n3. Ввести верхний предел интегрирования\n4. Ввести количество инетрвалов (необязательно)\n5. Закончить ввод\n6. Показать инструкцию");
 
                 switch (Console.ReadKey().Key)
                 {
@@ -61,9 +66,17 @@ namespace PracticeMathAnalysis
                         return;
                     case ConsoleKey.D4:
                         Console.Clear();
-                        Main();
+                        Console.WriteLine("Ввести количество инетрвалов:");
+                        intervals = Convert.ToDecimal(Console.ReadLine(), nfi);
+                        trigger = true;
+                        Console.Clear();
+                        ShowInput();
                         return;
                     case ConsoleKey.D5:
+                        Console.Clear();
+                        Main();
+                        return;
+                    case ConsoleKey.D6:
                         Console.Clear();
                         ShowInstruction();
                         return;
@@ -86,7 +99,7 @@ namespace PracticeMathAnalysis
                         if (functionBody != String.Empty && a != b)
                         {
                             Function function2 = new(functionBody, a, b);
-                            Console.WriteLine($"Результат при решении формулой Симпсона: {function2.SimpsonMethod()}");
+                            Console.WriteLine($"Результат при решении формулой Симпсона: {function2.SimpsonMethod().Result}\nКоличество интервалов: {(trigger ? intervals : function2.CalculateIntervals())}");
                             Console.Read();
                             Console.Clear();
                             Main();
@@ -125,8 +138,14 @@ namespace PracticeMathAnalysis
                         if (functionBody != String.Empty && a != b)
                         {
                             Function function = new(functionBody, a, b);
-                            decimal sm = function.SimpsonMethod(), ow = function.CalculateIntegral().Result;
-                            Console.WriteLine($"Решение методом Симпсона: {sm}\nРешение оптимальным методом: {ow}\nПогрешность {Math.Abs(ow - sm)}");
+                            decimal sm, om = function.CalculateIntegral().Result;
+
+                            if (trigger)
+                                sm = function.SimpsonMethod(intervals, trigger).Result;
+                            else
+                                sm = function.SimpsonMethod().Result;
+
+                            Console.WriteLine($"Решение методом Симпсона: {sm}\nРешение оптимальным методом: {om}\nПогрешность: {Math.Abs(om - sm)}\nКоличество интервалов: {(trigger ? intervals : function.CalculateIntervals())}");
                             Console.Read();
                             Console.Clear();
                             Main();
